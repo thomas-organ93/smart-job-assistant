@@ -11,8 +11,7 @@ from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
-
-LOCAL_MODEL = os.environ.get("LOCAL_DEEPSEEK_MODEL")
+LOCAL_MODEL = os.environ.get("OLLAMA_MODEL")
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Smart Local Graduate Job Assistant")
