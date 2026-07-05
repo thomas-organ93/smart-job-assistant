@@ -1,0 +1,9 @@
+fastapi
+python-dotenv
+sqlalchemy
+psycopg2-binary
+uvicorn
+ollama
+requests
+beautifulsoup4
+playwright

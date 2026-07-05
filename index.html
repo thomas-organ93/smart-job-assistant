@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width:device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #323232;
+            --text-color: #e0e0e0;
+            --accent-color: #ffb000;
+            --border-color: #676767;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .refresh-btn {
+            background-color: var(--accent-color);
+            color: #0d1117;
+            border: None;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.9;
+        }
+
+        .job-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+
+        }
+
+        .job-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .company-name {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .status-select {
+            background-color: #2d2d2d;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #fff;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .text-block {
+            background: #575757;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .source-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Graduate Job Dashboard</h1>
+            <button class="refresh-btn" onclick="fetchJobs()">Refresh Jobs</button>
+        </header>
+        <main id="jobs-container">
+
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+
+        async function fetchJobs() {
+            const container = document.getElementById('jobs-container');
+            container.innerHTML = '<p>Loading pipeline data...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/jobs`);
+                const jobs = await response.json();
+
+                if (jobs.length === 0) {
+                    container.innerHTML = '<p>No jobs tracked yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                jobs.reverse().forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+
+                    card.innerHTML = `
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">${job.job_title}</div>
+                                <div class="company-name">${job.company}</div>
+                            </div>
+                            <div>
+                                <select class="status-select" onchange="updateStatus(${job.id}, this.value)">
+                                    <option value="Not Applied" ${job.status === 'Not Applied' ? 'selected' : ''}>❌ Not Applied</option>
+                                    <option value="Applied" ${job.status === 'Applied' ? 'selected' : ''}>✅ Applied</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Company Breakdown</div>
+                        <div class="text-block">${job.company_breakdown || 'No data available.'}</div>
+
+                        <div class="section-title">Generated Cover Letter</div>
+                        <div class="text-block">${job.cover_letter_snippet || 'No letter snippet generated.'}</div>
+
+                        ${job.source_url ? `<a href="${job.source_url}" target="_blank" class="source-link">View Live Job Post</a>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                container.innerHTML = '<p>Error linking to backend: ${error.message}</p>';
+
+            }
+        }
+
+        // Trigger FastAPI PATCH status updater on click
+        async function updateStatus(jobId, newStatus) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    alert('Backend rejected status sync update!');
+                }
+            } catch (error) {
+                console.error('Network Error updating status:', error);
+                alert('Could not synchronize status value to backend.');
+            }
+        }
+
+        window.onload = fetchJobs;
+    </script>
+</body>
+
+</html>
