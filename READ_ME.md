@@ -25,7 +25,7 @@ This project was developed locally across several structural iterations before d
    ```
 
 
-## Set up credentials: Create a .env file in the project root folder based on the template below:
+## Set up credentials: Create a `.env` file in the project root folder based on the template below:
 ```text
    ADZUNA_APP_ID=your_adzuna_id
    ADZUNA_APP_KEY=your_adzuna_key
@@ -33,6 +33,10 @@ This project was developed locally across several structural iterations before d
    POSTGRES_DB_USER=postgres
    POSTGRES_DB_PASSWORD=password
 ```
+
+## Set up CV: Create a `cv.txt` file in the project root folder.
+- Copy and paste the raw text of your cv into here. The local LLM will customize the cover letter based on your qualifications.
+- Note: For a specific prompt on how your LLM generated your cover letter. Go to `main.py` and to `prompt = {...` to configure.
 
 
 ## Create and activate your Python virtual environment:
