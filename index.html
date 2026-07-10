@@ -166,6 +166,9 @@
                                     <option value="Not Applied" ${job.status === 'Not Applied' ? 'selected' : ''}>❌ Not Applied</option>
                                     <option value="Applied" ${job.status === 'Applied' ? 'selected' : ''}>✅ Applied</option>
                                 </select>
+
+                                <button class="status-select" onclick="deleteJob(${job.id})">Delete</button>
+
                             </div>
                         </div>
 
@@ -181,7 +184,7 @@
                 });
 
             } catch (error) {
-                container.innerHTML = '<p>Error linking to backend: ${error.message}</p>';
+                container.innerHTML = `<p>Error linking to backend: ${error.message}</p>`;
 
             }
         }
@@ -201,6 +204,25 @@
             } catch (error) {
                 console.error('Network Error updating status:', error);
                 alert('Could not synchronize status value to backend.');
+            }
+        }
+
+        async function deleteJob(jobId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json'}
+                });
+
+                if (!response.ok) {
+                    alert('Backend rejected deletion request.')
+                } else {
+                    alert('Job deleted successfully.')
+                    await fetchJobs() // refresh list
+                }
+            } catch (error) {
+                console.error('Network Error deleting job:', error)
+                alert('Could not synchronize deletion request to backend.')
             }
         }
 

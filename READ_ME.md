@@ -74,3 +74,12 @@ To containerize the application gateway:
    docker run -p 8000:8000 --env-file .env -e DB_HOST=host.docker.internal job-assistant
    ```
 
+## The Frontend Dashboard (`index.html`)
+
+To visualize the automated pipeline, this project includes a lightweight, custom-built web dashboard. 
+
+* **Zero Dependencies:** Built entirely with native HTML, CSS, and Vanilla JavaScript. No heavy frameworks (like React or Angular) were used, keeping the footprint incredibly small.
+* **Async Fetch API:** Communicates directly with the FastAPI backend (`http://localhost:8000`) using asynchronous `fetch()` calls to retrieve and display the AI-processed job payloads.
+* **Dynamic DOM Rendering:** Automatically iterates through the PostgreSQL database rows and dynamically generates structured HTML cards containing the AI-generated company breakdown and cover letter snippets.
+* **Direct Database Control:** Includes active UI event listeners (like the 'Delete' functionality) that trigger `DELETE` endpoint requests to instantly synchronize the PostgreSQL database and refresh the DOM without page reloads.
+

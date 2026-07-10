@@ -60,7 +60,7 @@ def auto_search_and_pipeline(keywords="graduate software engineer", location="lo
 
         print(f"\n[{i + 1}/{len(jobs_list)}] Processing: '{title}' at {company} ({job_location})")
 
-        # In search_pipeline.py, update the request block inside the loop:
+        # Limit characters
         short_description = raw_description[:1000]
         full_text_payload = f"Title: {title}. Company: {company}. Location: {job_location}. Details: {short_description}"
 

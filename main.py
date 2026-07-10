@@ -11,6 +11,13 @@ from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
+if os.path.exists('/.dockerenv'):
+    OLLAMA_HOST = "http://host.docker.internal:11434"
+else:
+    OLLAMA_HOST = "http://localhost:11434"
+
+client = ollama.Client(host=OLLAMA_HOST)
+
 LOCAL_MODEL = os.environ.get("OLLAMA_MODEL")
 
 models.Base.metadata.create_all(bind=engine)
@@ -37,6 +44,7 @@ def get_db():
         db.close()
 
 
+# Create job post
 @app.post("/jobs/enrich")
 def process_and_track_job(
         job_description: str,
@@ -144,11 +152,13 @@ def process_and_track_job(
         raise HTTPException(status_code=500, detail=f"AI Enrichment failed: {str(e)}")
 
 
+# Get all tracked jobs
 @app.get("/jobs")
 def get_all_tracked_jobs(db: Session = Depends(get_db)):
     return db.query(models.GraduateJob).all()
 
 
+# Update Job Status
 @app.patch("/jobs/{job_id}/status")
 def update_job_status(
         job_id: int,
@@ -163,3 +173,17 @@ def update_job_status(
     db.commit()
     db.refresh(job)
     return {"status": "Updated", "tracked_data": job}
+
+# Delete job
+@app.delete("/jobs/{job_id}")
+def delete_job(
+        job_id: int,
+        db: Session = Depends(get_db)
+):
+    job = db.query(models.GraduateJob).filter(models.GraduateJob.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job record not found")
+
+    db.delete(job)
+    db.commit()
+    return None
